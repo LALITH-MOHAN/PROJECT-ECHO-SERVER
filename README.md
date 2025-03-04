@@ -7,7 +7,7 @@ The goal of this project is to develop an **Echo Server** in C that responds to 
 - **Client-Server Communication:** Server listens for client messages and echoes them back.
 - **Timestamping:** Each response includes a **timestamp** from the client.
 - **Message Counter:** The server tracks the **number of messages processed**.
-- **Multi-client Support (Optional):** Can handle **multiple clients** using threading.
+- **Multi-client Support:** Can handle **multiple clients** using threading.
 
 ## **Technologies Used**
 - **Language:** C  
