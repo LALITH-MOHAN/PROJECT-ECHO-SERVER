@@ -4,6 +4,7 @@
 #include<netinet/in.h>
 #include<unistd.h>
 #include<stdlib.h>
+#include<string.h>
 
 struct message 
 {
@@ -11,6 +12,7 @@ struct message
     char time[100];
     int ct;
 };
+void encrp_decrp(char *msg,char *key);
 int main()
 {
     int client_fd=socket(AF_INET,SOCK_STREAM,0);
@@ -25,10 +27,23 @@ int main()
        exit(EXIT_FAILURE);
     }
     struct message receiver;
-    send(client_fd,"HI FROM CLIENT",15,0);
+    #define KEY "key" // secret key
+    char buff[]="HI FROM CLIENT";
+    encrp_decrp(buff,KEY); //encrypted message
+    send(client_fd,buff,sizeof(buff),0);
     printf("MESSAGE SENT\n");
     recv(client_fd,&receiver,sizeof(receiver),0);
+    encrp_decrp(receiver.msg,KEY); //decrypted message
     printf("ECHO MESSAGE: %s\n",receiver.msg);
     printf("TIMESTAMP: %s\n",receiver.time);
     printf("COUNT:%d\n",receiver.ct);
+}
+
+void encrp_decrp(char *msg,char *key)
+{
+    int keyl=strlen(key);
+    for(int i=0;msg[i]!='\0';i++)
+    {
+       msg[i]^=key[i%keyl];
+    }
 }
