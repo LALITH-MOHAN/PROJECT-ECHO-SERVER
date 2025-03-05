@@ -8,11 +8,11 @@
 
 struct message 
 {
-    char msg[1024];
-    char time[10];
-    char date[11];
-    int ct;
-    int uptime;  
+    char msg[1024];  //message
+    char time[10];  //time stamp
+    char date[11]; //present date
+    int ct;       //count for no of messages echoed
+    int uptime;  //uptime in seconds
 };
 
 void encrp_decrp(char *msg, char *key);
