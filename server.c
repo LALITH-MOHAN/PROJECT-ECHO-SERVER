@@ -12,10 +12,10 @@
 struct message 
 {
     char msg[1024];
-    char time[100];
+    char time[10];
     int ct;
 };
-
+void encrp_decrp(char *msg,char *key);
 int main() 
 {
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -68,14 +68,28 @@ int main()
     struct tm *time_info;
     time(&current_time);
     time_info = localtime(&current_time);
-    sprintf(det.time, "%d:%d:%d", time_info->tm_hour, time_info->tm_min, time_info->tm_sec);
+    sprintf(det.time, "%d:%d:%d", time_info->tm_hour, time_info->tm_min, time_info->tm_sec); // timestamp
+    #define KEY "key" //secret key
+    encrp_decrp(buff,KEY); // decryption
     strncpy(det.msg, buff, sizeof(det.msg) - 1);
     det.msg[sizeof(det.msg) - 1] = '\0'; 
+    printf("MESSAGE:%s",det.msg); // message from client
     det.ct = 1;
+    encrp_decrp(det.msg,KEY); //encryption
     send(client_sock, (char*)&det, sizeof(det), 0);
-    printf("MESSAGE SENT: %s at %s\n", det.msg, det.time);
+    encrp_decrp(det.msg,KEY);
+    printf("\nMESSAGE SENT: %s at %s\n",det.msg, det.time);
     close(client_sock);
     close(server_fd);
     
     return 0;
+}
+
+void encrp_decrp(char *msg,char *key)
+{
+    int keyl=strlen(key);
+    for(int i=0;msg[i]!='\0';i++)
+    {
+       msg[i]^=key[i%keyl];
+    }
 }
