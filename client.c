@@ -45,8 +45,8 @@ int main()
     printf("ECHO MESSAGE: %s\n", receiver.msg);
     printf("DATE: %s\n", receiver.date);
     printf("TIMESTAMP: %s\n", receiver.time);
-    printf("COUNT: %d\n", receiver.ct);
-    printf("UPTIME: %d seconds\n", receiver.uptime);  
+    printf("COUNT: %d\n",ntohl(receiver.ct));
+    printf("UPTIME: %d seconds\n",ntohl(receiver.uptime));  
     printf("\n");
     sleep(5);
     close(client_fd);
