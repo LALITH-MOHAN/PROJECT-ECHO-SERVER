@@ -32,7 +32,6 @@ int main()
        perror("CONNECTION FAILED");
        exit(EXIT_FAILURE);
     }
-    
     struct message receiver;
     #define KEY "key"
     char buff[] = "HI FROM CLIENT";
