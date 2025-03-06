@@ -132,17 +132,15 @@ int main()
                 strncpy(det.msg, buff, sizeof(det.msg) - 1);
                 det.msg[sizeof(det.msg) - 1] = '\0';
                 total_messages++;
-                det.ct = total_messages; // count of messages
+                det.ct = htonl(total_messages); // count of messages
+                det.uptime = htonl((int)(current_time - start_time)); //uptime
                 
-                // Calculate uptime
-                det.uptime = (int)(current_time - start_time);
-
                 printf("MESSAGE FROM CLIENT FD %d: %s\n", fds[i].fd, det.msg);
                 
                 encrp_decrp(det.msg, KEY); // encrypt the message before sending
                 send(fds[i].fd, (char*)&det, sizeof(det), 0);
                 encrp_decrp(det.msg, KEY);
-                printf("MESSAGE SENT: %s at %s on %s,Uptime: %d seconds\n", det.msg, det.time, det.date, det.uptime);
+                printf("MESSAGE SENT: %s at %s on %s,Uptime: %d seconds\n", det.msg, det.time, det.date, ntohl(det.uptime));
             }
         }
     }
