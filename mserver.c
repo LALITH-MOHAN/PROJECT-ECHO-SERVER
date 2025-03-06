@@ -11,7 +11,7 @@
 #define PORT 8080
 #define MAX_CLIENTS 10
 #define TIME 20000
-
+//record to be sent 
 struct message 
 {
     char msg[1024];  //message
@@ -62,10 +62,10 @@ int main()
     
     for (int i = 1; i <= MAX_CLIENTS; i++) 
     {
-        fds[i].fd = -1;
+        fds[i].fd = -1; //initailly set the fd values of client in fds array as -1
     }
     
-    int total_messages = 0; 
+    int total_messages = 0; // count for messages echoed
     time_t start_time = time(NULL);  // Server start time
     
     while (1) 
@@ -81,9 +81,10 @@ int main()
             printf("NO NEW CONNECTIONS FOR %d secs\n", TIME / 1000);
             break;
         }
+        // add new clients to the fds array
         if (fds[0].revents & POLLIN) 
         {
-            int client_sock = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
+            int client_sock = accept(server_fd, (struct sockaddr*)&client_addr, &client_len); // new client connected
             if (client_sock < 0) 
             {
                 perror("ACCEPT FAILED");
@@ -101,14 +102,14 @@ int main()
                 }
             }
         }
-        
+        // handle clients
         for (int i = 1; i <= MAX_CLIENTS; i++) 
         {
             if (fds[i].fd != -1 && (fds[i].revents & POLLIN)) 
             {
                 struct message det;
                 char buff[1024] = {0};
-                int rec = recv(fds[i].fd, buff, sizeof(buff) - 1, 0);
+                int rec = recv(fds[i].fd, buff, sizeof(buff) - 1, 0); //no of bytes received
                 
                 if (rec <= 0) 
                 {
@@ -123,25 +124,25 @@ int main()
                 struct tm *time_info;
                 time(&current_time); // noting the current time
                 time_info = localtime(&current_time);
-                sprintf(det.time, "%02d:%02d:%02d", time_info->tm_hour, time_info->tm_min, time_info->tm_sec);
-                sprintf(det.date, "%d/%d/%d", time_info->tm_mday, time_info->tm_mon + 1, time_info->tm_year + 1900);
+                sprintf(det.time, "%02d:%02d:%02d", time_info->tm_hour, time_info->tm_min, time_info->tm_sec); //storing the current time
+                sprintf(det.date, "%d/%d/%d", time_info->tm_mday, time_info->tm_mon + 1, time_info->tm_year + 1900); //storing the persent date
                 
-                #define KEY "key"
-                encrp_decrp(buff, KEY);
+                #define KEY "key" // secret key
+                encrp_decrp(buff, KEY); //decrypt the message
                 strncpy(det.msg, buff, sizeof(det.msg) - 1);
                 det.msg[sizeof(det.msg) - 1] = '\0';
                 total_messages++;
-                det.ct = total_messages;
+                det.ct = total_messages; // count of messages
                 
                 // Calculate uptime
                 det.uptime = (int)(current_time - start_time);
 
                 printf("MESSAGE FROM CLIENT FD %d: %s\n", fds[i].fd, det.msg);
                 
-                encrp_decrp(det.msg, KEY);
+                encrp_decrp(det.msg, KEY); // encrypt the message before sending
                 send(fds[i].fd, (char*)&det, sizeof(det), 0);
                 encrp_decrp(det.msg, KEY);
-                printf("MESSAGE SENT: %s at %s on %s (Uptime: %d seconds)\n", det.msg, det.time, det.date, det.uptime);
+                printf("MESSAGE SENT: %s at %s on %s,Uptime: %d seconds\n", det.msg, det.time, det.date, det.uptime);
             }
         }
     }
