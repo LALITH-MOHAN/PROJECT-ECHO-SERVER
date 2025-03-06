@@ -13,13 +13,16 @@ struct message
 {
     char msg[1024];
     char time[10];
+    char date[11];
+    int uptime;
     int ct;
 };
 void encrp_decrp(char *msg,char *key);
 int main() 
 {
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == -1) {
+    if (server_fd == -1) 
+    {
         perror("SOCKET CREATION FAILED");
         exit(EXIT_FAILURE);
     }
@@ -46,6 +49,7 @@ int main()
     }
 
     printf("LISTENING...\n");
+    time_t start=time(NULL);
     int client_sock = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
     if (client_sock < 0) 
     {
@@ -57,7 +61,8 @@ int main()
     char buff[1024] = {0};
 
     int rec = recv(client_sock, buff, sizeof(buff) - 1, 0);
-    if (rec < 0) {
+    if (rec < 0) 
+    {
         perror("RECEIVE FAILED");
         exit(EXIT_FAILURE);
     }
@@ -67,18 +72,21 @@ int main()
     time_t current_time;
     struct tm *time_info;
     time(&current_time);
+    det.uptime=(int)(current_time-start);
     time_info = localtime(&current_time);
     sprintf(det.time, "%d:%d:%d", time_info->tm_hour, time_info->tm_min, time_info->tm_sec); // timestamp
+    sprintf(det.date,"%d/%d/%d",time_info->tm_mday,time_info->tm_mon+1,time_info->tm_year+1900); //present date
+    
     #define KEY "key" //secret key
     encrp_decrp(buff,KEY); // decryption
     strncpy(det.msg, buff, sizeof(det.msg) - 1);
     det.msg[sizeof(det.msg) - 1] = '\0'; 
-    printf("MESSAGE:%s",det.msg); // message from client
+    printf("MESSAGE FROM CLIENT:%s\n",det.msg); // message from client
     det.ct = 1;
     encrp_decrp(det.msg,KEY); //encryption
     send(client_sock, (char*)&det, sizeof(det), 0);
     encrp_decrp(det.msg,KEY);
-    printf("\nMESSAGE SENT: %s at %s\n",det.msg, det.time);
+    printf("\nMESSAGE SENT: %s at %s on %s\n",det.msg, det.time,det.date);
     close(client_sock);
     close(server_fd);
     
